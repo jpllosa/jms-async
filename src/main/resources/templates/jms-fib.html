@@ -1,0 +1,13 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head> 
+    <title>Fibonacci Result via JMS</title> 
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+	<h1>Fibonacci Result via JMS</h1>
+	<p th:text="'Numbers: ' + ${numbers}" />
+    <p th:text="'Result: ' + ${result}" />
+    <a th:href="@{/fib-updates/{id}(id = ${id})}">Check here in a few seconds for the result</a>
+</body>
+</html>
