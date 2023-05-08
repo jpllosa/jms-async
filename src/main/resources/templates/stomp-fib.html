@@ -1,0 +1,54 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head> 
+    <title>Fibonacci Result via WebSocket</title> 
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+</head>
+<body>
+	<h1>Fibonacci Result via WebSocket</h1>
+	<p th:text="'Numbers: ' + ${numbers}" />
+    <p id="result" th:text="'Result: ' + ${result}" />
+    <p>The result will update in a few seconds (<span id="sec"></span>).</p>
+</body>
+
+<script th:inline="javascript">
+$(document).ready(function() {
+	var socket = new SockJS("/fibonacci-websocket");
+	var stompClient = Stomp.over(socket);
+	var $result = $("#result");
+	var $sec = $("#sec");
+	var timer;
+	var counter = 1;
+	
+	stompClient.connect({}, function(frame) {
+		console.log("connected");
+		stompClient.subscribe("/topic/fibonacci-result", function(message) {
+			var fibMsg = JSON.parse(message.body);
+			$result.text("Result: " + fibMsg.result);
+			clearInterval(timer);
+			
+			setTimeout(function() {
+				if (stompClient !== null) {
+			        stompClient.disconnect();
+			        console.log("disconnected");
+			    }
+			}, 5000);
+		});
+		
+		setTimeout(function() {
+			stompClient.send("/app/fibonacci-id", {}, JSON.stringify({
+				id: [[${id}]],
+			}));
+			
+			timer = setInterval(function() {
+				$sec.text(counter);
+				counter++;
+			}, 1000);
+		}, 1000);
+	});
+});
+</script>
+</html>
